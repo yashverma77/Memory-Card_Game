@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="memory.png" type="image/x-icon">
+
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Memory Match</h1>
+            <div class="theme-toggle">
+                <i class="fas fa-moon"></i>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fas fa-sun"></i>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <div class="stats">
+                <div class="stat-box">
+                    <i class="fas fa-stopwatch"></i>
+                    <span id="timer">00:00</span>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-star"></i>
+                    <span id="score">0</span>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-trophy"></i>
+                    <span id="best-score">0</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="pause-btn" class="control-btn">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button id="reset-btn" class="control-btn">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button id="sound-btn" class="control-btn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-level="easy">Easy</button>
+            <button class="difficulty-btn" data-level="medium">Medium</button>
+            <button class="difficulty-btn" data-level="hard">Hard</button>
+        </div>
+
+        <div class="theme-selector">
+            <button class="theme-btn active" data-theme="animals">Animals</button>
+            <button class="theme-btn" data-theme="emojis">Emojis</button>
+            <button class="theme-btn" data-theme="superheroes">Superheroes</button>
+        </div>
+
+        <div class="game-board" id="game-board">
+            <!-- Cards will be inserted here via JavaScript -->
+        </div>
+
+        <div id="leaderboard-container" class="leaderboard-container">
+            <div class="leaderboard">
+                <h2>Top Scores</h2>
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Score</th>
+                            <th>Time</th>
+                            <th>Difficulty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Leaderboard entries will be inserted here -->
+                    </tbody>
+                </table>
+                <button id="close-leaderboard" class="btn">Close</button>
+            </div>
+        </div>
+
+        <button id="show-leaderboard" class="leaderboard-btn">
+            <i class="fas fa-list"></i> Leaderboard
+        </button>
+    </div>
+
+    <!-- Start Game Modal -->
+    <div id="start-modal" class="modal">
+        <div class="modal-content">
+            <h2>Memory Match</h2>
+            <p>Test your memory by matching pairs of cards!</p>
+            <div class="game-instructions">
+                <p>Select difficulty and theme, then press Start to begin.</p>
+                <p>The timer will start when you click Start.</p>
+            </div>
+            <button id="start-game-btn" class="btn">Start Game</button>
+        </div>
+    </div>
+
+    <div id="game-over" class="modal">
+        <div class="modal-content">
+            <h2>Congratulations!</h2>
+            <p>You've completed the game!</p>
+            <div class="game-stats">
+                <div>Score: <span id="final-score"></span></div>
+                <div>Time: <span id="final-time"></span></div>
+            </div>
+            <button id="play-again" class="btn">Play Again</button>
+        </div>
+    </div>
+
+    <div id="pause-modal" class="modal">
+        <div class="modal-content">
+            <h2>Game Paused</h2>
+            <button id="resume-btn" class="btn">Resume</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

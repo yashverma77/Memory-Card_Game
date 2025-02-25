@@ -1,0 +1,423 @@
+:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --accent-color: #fd79a8;
+    --text-color: #2d3436;
+    --background-color: #f5f6fa;
+    --card-back: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    --card-border: #dfe6e9;
+    --success-color: #00b894;
+    --error-color: #ff7675;
+    --shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --modal-bg: rgba(255, 255, 255, 0.9);
+}
+
+.dark-mode {
+    --primary-color: #9b59b6;
+    --secondary-color: #8e44ad;
+    --accent-color: #e84393;
+    --text-color: #f5f6fa;
+    --background-color: #2d3436;
+    --card-back: linear-gradient(135deg, #9b59b6, #8e44ad);
+    --card-border: #636e72;
+    --success-color: #00b894;
+    --error-color: #ff7675;
+    --shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --modal-bg: rgba(45, 52, 54, 0.9);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--secondary-color);
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.game-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(5px);
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+}
+
+.stat-box i {
+    color: var(--primary-color);
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background-color: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+.difficulty-selector, .theme-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.difficulty-btn, .theme-btn {
+    padding: 8px 20px;
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.difficulty-btn:hover, .theme-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.difficulty-btn.active, .theme-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    width: 100%;
+    perspective: 1000px;
+}
+
+.card {
+    aspect-ratio: 3/4;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card.matched {
+    animation: matched 0.5s ease-in-out;
+    box-shadow: 0 0 15px var(--success-color);
+}
+
+@keyframes matched {
+    0% { transform: scale(1) rotateY(180deg); }
+    50% { transform: scale(1.1) rotateY(180deg); }
+    100% { transform: scale(1) rotateY(180deg); }
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--card-border);
+}
+
+.card-back {
+    background: var(--card-back);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-back i {
+    font-size: 2rem;
+    color: white;
+}
+
+.card-front {
+    background-color: white;
+    transform: rotateY(180deg);
+}
+
+.card-front img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--modal-bg);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 90%;
+    width: 400px;
+    box-shadow: var(--shadow);
+}
+
+.modal h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.game-stats {
+    margin: 20px 0;
+    font-size: 1.2rem;
+}
+
+.btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.leaderboard-btn {
+    margin-top: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.leaderboard-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+.leaderboard-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.leaderboard {
+    background-color: var(--modal-bg);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 90%;
+    width: 500px;
+    box-shadow: var(--shadow);
+}
+
+.leaderboard h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.leaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.leaderboard th, .leaderboard td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.leaderboard th {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.leaderboard tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .game-board {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .game-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-board {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .stats {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
