@@ -1,10 +1,10 @@
-// Sound effects
+// Sound effects using open-source files
 const sounds = {
-    flip: new Audio('https://assets.codepen.io/10053/flip.mp3'),
-    match: new Audio('https://assets.codepen.io/10053/match.mp3'),
-    wrong: new Audio('https://assets.codepen.io/10053/wrong.mp3'),
-    win: new Audio('https://assets.codepen.io/10053/win.mp3'),
-    bgMusic: new Audio('https://assets.codepen.io/10053/bg-music.mp3')
+    flip: new Audio('https://freesound.org/data/previews/240/240776_4107740-lq.mp3'),
+    match: new Audio('https://freesound.org/data/previews/131/131660_2398403-lq.mp3'),
+    wrong: new Audio('https://freesound.org/data/previews/142/142608_1840739-lq.mp3'),
+    win: new Audio('https://freesound.org/data/previews/270/270402_5123851-lq.mp3'),
+    bgMusic: new Audio('https://freesound.org/data/previews/384/384662_7312867-lq.mp3')
 };
 
 // Set background music to loop
@@ -91,6 +91,46 @@ function initGame() {
     // Show start modal instead of immediately starting the game
     showElement(elements.startModal);
     prepareNewGame();
+    
+    // Preload sounds to ensure they're ready
+    preloadSounds();
+}
+
+// Preload sounds
+function preloadSounds() {
+    // Force browser to load sounds
+    for (const sound in sounds) {
+        sounds[sound].load();
+    }
+    
+    // Add error handling for sound files
+    for (const sound in sounds) {
+        sounds[sound].addEventListener('error', () => {
+            console.warn(`Failed to load sound: ${sound}`);
+            // Fallback to alternative sound if primary fails
+            provideFallbackSound(sound);
+        });
+    }
+}
+
+// Provide fallback sounds if primary sources fail
+function provideFallbackSound(soundType) {
+    const fallbackSounds = {
+        flip: 'https://assets.mixkit.co/sfx/preview/mixkit-simple-countdown-922.mp3',
+        match: 'https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3',
+        wrong: 'https://assets.mixkit.co/sfx/preview/mixkit-negative-guitar-tone-2324.mp3',
+        win: 'https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3',
+        bgMusic: 'https://assets.mixkit.co/sfx/preview/mixkit-game-level-music-689.mp3'
+    };
+    
+    if (fallbackSounds[soundType]) {
+        sounds[soundType] = new Audio(fallbackSounds[soundType]);
+        sounds[soundType].load();
+        if (soundType === 'bgMusic') {
+            sounds.bgMusic.loop = true;
+            sounds.bgMusic.volume = 0.3;
+        }
+    }
 }
 
 // Event Listeners
@@ -192,8 +232,91 @@ function startGame() {
     startTimer();
     
     if (gameState.soundEnabled) {
-        sounds.bgMusic.play();
+        // Reset and play background music with error handling
+        try {
+            sounds.bgMusic.currentTime = 0;
+            const playPromise = sounds.bgMusic.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn('Background music autoplay prevented:', error);
+                    // Create a UI notification about sound being blocked
+                    createSoundNotification();
+                });
+            }
+        } catch (e) {
+            console.warn('Error playing background music:', e);
+        }
     }
+}
+
+// Create notification about sound being blocked
+function createSoundNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'sound-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <p>Sounds are blocked by your browser. Click anywhere to enable sounds.</p>
+            <button id="enable-sound-btn">Enable Sounds</button>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    // Add styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .sound-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #enable-sound-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #4caf50;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Add event listener to button
+    document.getElementById('enable-sound-btn').addEventListener('click', () => {
+        // Try to play a sound to enable audio
+        sounds.flip.play().then(() => {
+            sounds.flip.pause();
+            sounds.flip.currentTime = 0;
+            // Try to play background music again
+            if (gameState.soundEnabled) {
+                sounds.bgMusic.play();
+            }
+            // Remove notification
+            notification.remove();
+        }).catch(e => {
+            console.warn('Still unable to play sound:', e);
+        });
+    });
+    
+    // Auto-remove after 8 seconds
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.remove();
+        }
+    }, 8000);
 }
 
 // Create the game board with cards
@@ -336,6 +459,11 @@ function pauseGame() {
     elements.pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
     showElement(elements.pauseModal);
     playSound('flip');
+    
+    // Pause background music
+    if (gameState.soundEnabled) {
+        sounds.bgMusic.pause();
+    }
 }
 
 function resumeGame() {
@@ -343,6 +471,15 @@ function resumeGame() {
     elements.pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
     hideElement(elements.pauseModal);
     playSound('flip');
+    
+    // Resume background music
+    if (gameState.soundEnabled) {
+        try {
+            sounds.bgMusic.play();
+        } catch (e) {
+            console.warn('Error resuming background music:', e);
+        }
+    }
 }
 
 // End game
@@ -350,6 +487,10 @@ function endGame(isWinner = true) {
     clearInterval(gameState.timerInterval);
     gameState.isPlaying = false;
     gameState.gameStarted = false;
+    
+    // Stop background music
+    sounds.bgMusic.pause();
+    sounds.bgMusic.currentTime = 0;
     
     if (isWinner) {
         playSound('win');
@@ -375,7 +516,11 @@ function toggleSound() {
     if (gameState.soundEnabled) {
         elements.soundBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
         if (gameState.isPlaying && !gameState.isPaused) {
-            sounds.bgMusic.play();
+            try {
+                sounds.bgMusic.play();
+            } catch (e) {
+                console.warn('Error playing background music:', e);
+            }
         }
     } else {
         elements.soundBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
@@ -390,9 +535,20 @@ function toggleDarkMode() {
 
 // Play sound if enabled
 function playSound(soundName) {
-    if (gameState.soundEnabled) {
-        sounds[soundName].currentTime = 0;
-        sounds[soundName].play();
+    if (!gameState.soundEnabled || !sounds[soundName]) return;
+    
+    try {
+        // Create a clone of the audio to allow overlapping sounds
+        if (soundName !== 'bgMusic') {
+            const soundClone = sounds[soundName].cloneNode();
+            soundClone.volume = sounds[soundName].volume;
+            soundClone.play().catch(e => console.warn(`Error playing ${soundName} sound:`, e));
+        } else {
+            sounds[soundName].currentTime = 0;
+            sounds[soundName].play().catch(e => console.warn(`Error playing ${soundName} sound:`, e));
+        }
+    } catch (e) {
+        console.warn(`Error playing ${soundName} sound:`, e);
     }
 }
 
